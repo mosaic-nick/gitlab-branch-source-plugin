@@ -204,6 +204,12 @@ public class GitLabPipelineStatusNotifier {
         if (sourceContext.notificationsDisabled()) {
             return;
         }
+        String notificationsDisabledOnBranchesPattern = sourceContext
+            .getNotificationsDisabledOnBranches();
+        if (!notificationsDisabledOnBranchesPattern.equals("") &&
+            build.getParent().getName().matches(notificationsDisabledOnBranchesPattern)) {
+            return;
+        }
         String url = getRootUrl(build);
         if (url.isEmpty()) {
             listener.getLogger().println(
