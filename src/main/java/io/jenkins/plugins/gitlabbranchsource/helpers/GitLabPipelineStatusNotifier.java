@@ -206,9 +206,16 @@ public class GitLabPipelineStatusNotifier {
         }
         String notificationsDisabledOnBranchesPattern = sourceContext
             .getNotificationsDisabledOnBranches();
-        if (!notificationsDisabledOnBranchesPattern.equals("") &&
-            build.getParent().getName().matches(notificationsDisabledOnBranchesPattern)) {
-            return;
+        String branchName = build.getParent().getName();
+        if (!notificationsDisabledOnBranchesPattern.equals("")) {
+            listener.getLogger()
+                .format("[GitLab Pipeline Status] Testing branch name '%s' against %s%n",
+                    branchName, notificationsDisabledOnBranchesPattern);
+            if (branchName.matches(notificationsDisabledOnBranchesPattern)) {
+                listener.getLogger().println("[GitLab Pipeline Status] Branch name matched - not sending notification");
+                return;
+            }
+            listener.getLogger().println("[GitLab Pipeline Status] Branch name did not match - sending notification");
         }
         String url = getRootUrl(build);
         if (url.isEmpty()) {

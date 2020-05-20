@@ -9,16 +9,16 @@
   </parent>
   <groupId>io.jenkins.plugins</groupId>
   <artifactId>gitlab-branch-source</artifactId>
-  <version>1.5.1</version>
+  <version>1.5.1-CUSTOM-SNAPSHOT</version>
   <packaging>hpi</packaging>
   <properties>
-    <revision>1.5.1</revision>
+    <revision>1.5.1-CUSTOM</revision>
     <changelist>-SNAPSHOT</changelist>
     <jenkins.version>2.176.2</jenkins.version>
     <java.level>8</java.level>
     <jcasc.version>1.36</jcasc.version>
   </properties>
-  <name>GitLab Branch Source Plugin</name>
+  <name>GitLab Branch Source Plugin (MSD)</name>
   <description>GitLab Provides branch source and folder organisation functionality for GitLab
     Repositories in Jenkins Source Plugin
   </description>
