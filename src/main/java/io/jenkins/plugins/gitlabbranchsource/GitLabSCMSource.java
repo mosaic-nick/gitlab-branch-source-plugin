@@ -423,7 +423,7 @@ public class GitLabSCMSource extends AbstractGitSCMSource {
                             : "Untrusted")));
                         for (ChangeRequestCheckoutStrategy strategy : strategies.get(fork)) {
                             if (request.process(new MergeRequestSCMHead(
-                                    "MR-" + mr.getIid() + (strategies.get(fork).size() > 1 ? "-" + strategy.name()
+                                    "MR-" + mr.getIid() + " (" + mr.getSourceBranch() + " → " + mr.getTargetBranch() + ")" + (strategies.get(fork).size() > 1 ? "-" + strategy.name()
                                         .toLowerCase(Locale.ENGLISH) : ""),
                                     mr.getIid(),
                                     new BranchSCMHead(mr.getTargetBranch()),
