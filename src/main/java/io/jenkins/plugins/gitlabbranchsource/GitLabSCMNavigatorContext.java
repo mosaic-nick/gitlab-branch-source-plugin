@@ -12,6 +12,8 @@ public class GitLabSCMNavigatorContext extends
 
     private int projectNamingStrategy = 1;
 
+    private boolean wantArchivedProjects;
+
     @NonNull
     @Override
     public GitLabSCMNavigatorRequest newRequest(@NonNull SCMNavigator navigator,
@@ -42,6 +44,15 @@ public class GitLabSCMNavigatorContext extends
 
     public GitLabSCMNavigatorContext withProjectNamingStrategy(int strategyId) {
         this.projectNamingStrategy = strategyId;
+        return this;
+    }
+
+    public boolean wantArchivedProjects() {
+        return wantArchivedProjects;
+    }
+
+    public GitLabSCMNavigatorContext wantArchivedProjects(boolean include) {
+        this.wantArchivedProjects = include;
         return this;
     }
 }
