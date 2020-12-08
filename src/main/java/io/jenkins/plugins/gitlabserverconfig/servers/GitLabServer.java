@@ -15,10 +15,14 @@ import hudson.security.ACL;
 import hudson.util.FormValidation;
 import hudson.util.ListBoxModel;
 import io.jenkins.plugins.gitlabserverconfig.credentials.PersonalAccessToken;
+import io.jenkins.plugins.gitlabserverconfig.credentials.StringPersonalAccessTokenWrapper;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 import jenkins.model.Jenkins;
 import jenkins.scm.api.SCMName;
 import org.apache.commons.lang.RandomStringUtils;
@@ -26,6 +30,7 @@ import org.apache.commons.lang.StringUtils;
 import org.gitlab4j.api.GitLabApi;
 import org.gitlab4j.api.GitLabApiException;
 import org.gitlab4j.api.models.User;
+import org.jenkinsci.plugins.plaincredentials.StringCredentials;
 import org.kohsuke.accmod.Restricted;
 import org.kohsuke.accmod.restrictions.DoNotUse;
 import org.kohsuke.accmod.restrictions.NoExternalUse;
@@ -48,7 +53,10 @@ public class GitLabServer extends AbstractDescribableImpl<GitLabServer> {
      * The credentials matcher for GitLab Personal Access Token
      */
     public static final CredentialsMatcher CREDENTIALS_MATCHER = CredentialsMatchers
-        .instanceOf(PersonalAccessToken.class);
+        .anyOf(
+            CredentialsMatchers.instanceOf(PersonalAccessToken.class),
+            CredentialsMatchers.instanceOf(StringCredentials.class)
+        );
     /**
      * Used as default community saas version server URL for the serverUrl field
      */
@@ -105,8 +113,8 @@ public class GitLabServer extends AbstractDescribableImpl<GitLabServer> {
     private String credentialsId;
 
     /**
-     * The Jenkins root URL to use in Gitlab hooks, instead of {@link Jenkins#getRootUrl()}.
-     * Useful when the main public Jenkins URL can't be accessed from Gitlab.
+     * The Jenkins root URL to use in Gitlab hooks, instead of {@link Jenkins#getRootUrl()}. Useful
+     * when the main public Jenkins URL can't be accessed from Gitlab.
      */
     private String hooksRootUrl;
 
@@ -215,18 +223,26 @@ public class GitLabServer extends AbstractDescribableImpl<GitLabServer> {
     public PersonalAccessToken getCredentials() {
         Jenkins jenkins = Jenkins.get();
         jenkins.checkPermission(CredentialsProvider.USE_OWN);
+        List<PersonalAccessToken> credentials = new ArrayList<>();
+        credentials.addAll(lookupCredentials(
+            PersonalAccessToken.class,
+            jenkins,
+            ACL.SYSTEM,
+            fromUri(defaultIfBlank(serverUrl, GITLAB_SERVER_URL)).build()
+        ));
+        credentials.addAll(lookupCredentials(
+            StringCredentials.class,
+            jenkins,
+            ACL.SYSTEM,
+            fromUri(defaultIfBlank(serverUrl, GITLAB_SERVER_URL)).build()
+        ).stream().map(x -> new StringPersonalAccessTokenWrapper(x)).collect(Collectors.toList()));
         return StringUtils.isBlank(credentialsId) ? null : CredentialsMatchers.firstOrNull(
-            lookupCredentials(
-                PersonalAccessToken.class,
-                jenkins,
-                ACL.SYSTEM,
-                fromUri(defaultIfBlank(serverUrl, GITLAB_SERVER_URL)).build()
-            ), withId(credentialsId));
+            credentials, withId(credentialsId));
     }
 
     /**
-     * @param hooksRootUrl a custom root URL, to be used in hooks instead of {@link Jenkins#getRootUrl()}.
-     * Set to {@code null} for default behavior.
+     * @param hooksRootUrl a custom root URL, to be used in hooks instead of {@link
+     * Jenkins#getRootUrl()}. Set to {@code null} for default behavior.
      */
     @DataBoundSetter
     public void setHooksRootUrl(String hooksRootUrl) {
@@ -234,8 +250,8 @@ public class GitLabServer extends AbstractDescribableImpl<GitLabServer> {
     }
 
     /**
-     * @return the custom root URL, to be used in hooks instead of {@link Jenkins#getRootUrl()}.
-     * Can be either a root URL with its trailing slash, or {@code null}.
+     * @return the custom root URL, to be used in hooks instead of {@link Jenkins#getRootUrl()}. Can
+     * be either a root URL with its trailing slash, or {@code null}.
      */
     @CheckForNull
     public String getHooksRootUrl() {
@@ -271,7 +287,8 @@ public class GitLabServer extends AbstractDescribableImpl<GitLabServer> {
                 return FormValidation.error("Malformed url (%s)", e.getMessage());
             }
             if (GITLAB_SERVER_URL.equals(serverUrl)) {
-                LOGGER.log(Level.FINEST, String.format("Community version of GitLab: %s", serverUrl));
+                LOGGER
+                    .log(Level.FINEST, String.format("Community version of GitLab: %s", serverUrl));
             }
             GitLabApi gitLabApi = new GitLabApi(serverUrl, "");
             try {
@@ -300,10 +317,11 @@ public class GitLabServer extends AbstractDescribableImpl<GitLabServer> {
                 return FormValidation.error("Malformed url (%s)", e.getMessage());
             }
             if (hooksRootUrl.endsWith("/post")
-                    || hooksRootUrl.contains("/gitlab-webhook")
-                    || hooksRootUrl.contains("/gitlab-systemhook")) {
+                || hooksRootUrl.contains("/gitlab-webhook")
+                || hooksRootUrl.contains("/gitlab-systemhook")) {
                 LOGGER.log(Level.FINEST, "Dubious hooks root URL: {0}", hooksRootUrl);
-                return FormValidation.warning("This looks like a full webhook URL, it should only be a root URL.");
+                return FormValidation
+                    .warning("This looks like a full webhook URL, it should only be a root URL.");
             }
             return FormValidation.ok();
         }
