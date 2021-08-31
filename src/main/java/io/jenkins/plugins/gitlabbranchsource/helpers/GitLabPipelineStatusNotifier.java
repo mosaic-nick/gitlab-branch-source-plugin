@@ -241,6 +241,11 @@ public class GitLabPipelineStatusNotifier {
         if (sourceContext.notificationsDisabled()) {
             return;
         }
+
+        if (!shouldSendNotificationsForBranch(sourceContext, build.getParent().getName(), listener)) {
+            return;
+        }
+
         String url = getRootUrl(build);
         if (url.isEmpty()) {
             listener.getLogger().println(
@@ -339,6 +344,35 @@ public class GitLabPipelineStatusNotifier {
         }
     }
 
+    private static boolean shouldSendNotificationsForBranch(
+        GitLabSCMSourceContext sourceContext, String branchName, TaskListener listener) {
+        String notificationsDisabledOnBranchesPattern = sourceContext
+            .getNotificationsDisabledOnBranches();
+        if (!notificationsDisabledOnBranchesPattern.equals("")) {
+            String message = String.format("[GitLab Pipeline Status] Testing branch name '%s' against %s%n",
+                branchName, notificationsDisabledOnBranchesPattern);
+            if (listener != null) {
+                listener.getLogger().println(message);
+            }
+            LOGGER.log(Level.FINE, message);
+            if (branchName.matches(notificationsDisabledOnBranchesPattern)) {
+                message = "[GitLab Pipeline Status] Branch name matched - not sending notification";
+                if (listener != null) {
+                    listener.getLogger().println(
+                        message);
+                }
+                LOGGER.log(Level.FINE, message);
+                return false;
+            }
+            if (listener != null) {
+                message = "[GitLab Pipeline Status] Branch name did not match - sending notification";
+                listener.getLogger().println(message);
+            }
+            LOGGER.log(Level.FINE, message);
+        }
+        return true;
+    }
+
     @Extension
     public static class JobScheduledListener extends QueueListener {
 
@@ -366,6 +400,11 @@ public class GitLabPipelineStatusNotifier {
             if (sourceContext.notificationsDisabled()) {
                 return;
             }
+
+            if (!shouldSendNotificationsForBranch(sourceContext, job.getName(), null)) {
+                return;
+            }
+
             final SCMHead head = SCMHead.HeadByItem.findHead(job);
             if (head == null) {
                 return;

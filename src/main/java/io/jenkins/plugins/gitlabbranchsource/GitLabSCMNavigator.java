@@ -254,12 +254,23 @@ public class GitLabSCMNavigator extends SCMNavigator {
                         webHookCredentials.getToken().getPlainText(), null, getProxyConfig(serverUrl));
                 webHookUrl = GitLabHookCreator.getHookUrl(server, true);
             }
+            boolean wantArchivedProjects = request.wantArchivedProjects();
             for (Project p : projects) {
                 count++;
+
                 String projectPathWithNamespace = p.getPathWithNamespace();
                 String projectOwner = getProjectOwnerFromNamespace(projectPathWithNamespace);
                 String projectName = getProjectName(request.withProjectNamingStrategy(), p);
+
+                if (!wantArchivedProjects && p.getArchived()) {
+                    observer.getListener().getLogger()
+                        .format("%nIgnoring archived project %s%n",
+                            HyperlinkNote.encodeTo(p.getWebUrl(), projectName));
+                    continue;
+                }
+
                 getNavigatorProjects().add(projectPathWithNamespace);
+
                 if (StringUtils.isEmpty(p.getDefaultBranch())) {
                     observer.getListener().getLogger()
                         .format("%nIgnoring project with empty repository %s%n",

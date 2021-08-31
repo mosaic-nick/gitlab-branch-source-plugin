@@ -11,12 +11,15 @@ public class GitLabSCMNavigatorRequest extends SCMNavigatorRequest {
 
     private int projectNamingStrategy;
 
+    private final boolean wantArchivedProjects;
+
     protected GitLabSCMNavigatorRequest(@NonNull SCMNavigator source,
         @NonNull GitLabSCMNavigatorContext context,
         @NonNull SCMSourceObserver observer) {
         super(source, context, observer);
         wantSubgroupProjects = context.wantSubgroupProjects();
         projectNamingStrategy = context.withProjectNamingStrategy();
+        wantArchivedProjects = context.wantArchivedProjects();
     }
 
     /**
@@ -33,5 +36,12 @@ public class GitLabSCMNavigatorRequest extends SCMNavigatorRequest {
      */
     public int withProjectNamingStrategy() {
         return projectNamingStrategy;
+    }
+
+    /**
+     * @return whether to include archived projects
+     */
+    public boolean wantArchivedProjects() {
+        return wantArchivedProjects;
     }
 }

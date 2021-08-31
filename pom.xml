@@ -9,16 +9,16 @@
   </parent>
   <groupId>io.jenkins.plugins</groupId>
   <artifactId>gitlab-branch-source</artifactId>
-  <version>1.5.9</version>
+  <version>1.5.9-CUSTOM-SNAPSHOT</version>
   <packaging>hpi</packaging>
   <properties>
-    <revision>1.5.9</revision>
+    <revision>1.5.9-CUSTOM</revision>
     <changelist>-SNAPSHOT</changelist>
     <jenkins.version>2.263.4</jenkins.version>
     <java.level>8</java.level>
     <jcasc.version>1.36</jcasc.version>
   </properties>
-  <name>GitLab Branch Source Plugin</name>
+  <name>GitLab Branch Source Plugin (MSD)</name>
   <description>GitLab Provides branch source and folder organisation functionality for GitLab
     Repositories in Jenkins Source Plugin
   </description>
@@ -36,6 +36,10 @@
     <dependency>
       <groupId>org.jenkins-ci.plugins</groupId>
       <artifactId>scm-api</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.jenkins-ci.plugins</groupId>
+      <artifactId>credentials-binding</artifactId>
     </dependency>
     <dependency>
       <groupId>io.jenkins.plugins</groupId>
@@ -90,7 +94,6 @@
     <dependency>
       <groupId>org.jenkins-ci.plugins.workflow</groupId>
       <artifactId>workflow-api</artifactId>
-      <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>org.jenkins-ci.plugins.workflow</groupId>
@@ -121,7 +124,6 @@
       <groupId>org.jenkins-ci.plugins.workflow</groupId>
       <artifactId>workflow-multibranch</artifactId>
       <version>2.20</version>
-      <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>org.jenkins-ci.plugins</groupId>

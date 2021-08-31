@@ -33,6 +33,8 @@ public class GitLabSCMSourceContext
 
     private boolean notificationsDisabled;
 
+    private String notificationsDisabledOnBranches = "";
+
     private boolean logCommentEnabled;
 
     private String sudoUser = "";
@@ -96,6 +98,11 @@ public class GitLabSCMSourceContext
 
     public final boolean notificationsDisabled() {
         return notificationsDisabled;
+    }
+
+    @NonNull
+    public final String getNotificationsDisabledOnBranches() {
+        return notificationsDisabledOnBranches;
     }
 
     public final boolean projectAvatarDisabled() {
@@ -181,6 +188,12 @@ public class GitLabSCMSourceContext
     @NonNull
     public final GitLabSCMSourceContext withNotificationsDisabled(boolean disabled) {
         this.notificationsDisabled = disabled;
+        return this;
+    }
+
+    @NonNull
+    public final GitLabSCMSourceContext withNotificationsDisabledOnBranches(String pattern) {
+        this.notificationsDisabledOnBranches = pattern;
         return this;
     }
 
