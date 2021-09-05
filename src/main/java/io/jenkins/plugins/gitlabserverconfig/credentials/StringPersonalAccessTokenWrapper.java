@@ -40,6 +40,6 @@ public class StringPersonalAccessTokenWrapper implements PersonalAccessToken {
     @NonNull
     @Override
     public CredentialsDescriptor getDescriptor() {
-        return null;
+        return stringCredentials.getDescriptor();
     }
 }
